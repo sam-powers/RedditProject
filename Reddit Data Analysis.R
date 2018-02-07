@@ -4,30 +4,20 @@ library(tidyverse)
 library(tidytext)
 library(lubridate)
 
-# Cut off dates to divide the CVILLE data.
-# These are used in the Query Language for 
-as.numeric(as.POSIXct("2017-08-01 0:00:00 EST"))
-as.numeric(as.POSIXct("2017-08-13 0:00:00 EST"))
-as.numeric(as.POSIXct("2017-08-14 0:00:00 EST"))
-as.numeric(as.POSIXct("2017-08-15 0:00:00 EST"))
-as.numeric(as.POSIXct("2017-08-16 0:00:00 EST"))
-as.numeric(as.POSIXct("2017-08-21 0:00:00 EST"))
-as.numeric(as.POSIXct("2017-08-31 24:00:00 EST"))
 
-id1.12 <- "1CDZ_hR3kkJ2170YNRiE1cOGtAzcQgGDe" 
-id13 <- "1COrGtDGd6O1DT6JmuGR_oK1CuH_P1xjX"
-id14 <- "1CQ9SbUYkvwFpcV6GK06tfwL7PHLtCBya"
-id15 <- "1CUg_UMcMgZ6kt6q-m0ObnNJsXFqo5mSa"
 
-# Download Data #
-aug1_12 <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id1.12))
-aug13 <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id13))
-aug14 <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id14))
-aug15 <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id15))
-aug1_15 <-rbind(aug1_12, aug13, aug14, aug15)
+id <- "1D6SW839rjN9Eq_W1cWBRFMjgcNiP9ocZ"
+id.sept <- "1DBDfUhycuZ56yxTwoy__D-LW5iasu82E"
+id.oct <- "1DLoeXmBtiQ41xD9gbZGKgn2xwd9hx3ct"
+cville.aug  <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id))
+cville.sept <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.sept))
+cville.oct <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
+
+
+cville <- rbind(cville.aug, cville.sept, cville.oct)
 
 ########
-# Define the Functions I want for quick analysis #
+# Define the functions I want for quick analysis #
 
 # sentiment #
 sentimental <- function(dataframe){
@@ -47,54 +37,63 @@ sentimental <- function(dataframe){
 
 
 # Select the portions I want #
-aug1_15 <- aug1_15 %>% 
+cville.data <- cville %>% 
   dplyr::select(body, created_utc, subreddit) %>%
-  mutate(ID = 1:length(aug1_15$created_utc))
+  mutate(ID = 1:length(cville$created_utc))
 
 #######
 
 # Use formula to get the sentiments #
-aug1_15 <- sentimental(aug1_15)
-plotdata <- aug1_15 %>% gather("sent","n", 5:6 )
+cville.data <- sentimental(cville.data)
+plotdata <- cville.data %>% gather("sent","n", 5:6 )
 
 
 # Calculate number of tweets per hour #
-rates.aug1_15 <- aug1_15 %>% 
+rates.cville <- cville.data %>% 
   mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
   count(hour) %>%
   rename(count = n)
 
 # Average Sentiment per hour #
-avg.aug1_15 <- aug1_15 %>%
+avg.cville.data <- cville.data %>%
   mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
   group_by(hour) %>% 
   summarise(avgsent = mean(sentiment), avgpos = mean(positive), avgneg = mean(negative))
 
-# Join them
-rates.aug1_15 <- rates.aug1_15 %>% left_join(avg.aug1_15)
+avg.day <- cville.data %>%
+  mutate(hour = floor_date(anytime(created_utc), unit = "12 hour")) %>%
+  group_by(hour) %>% 
+  summarise(avgsent = mean(sentiment), avgpos = mean(positive), avgneg = mean(negative), varsent = var(sentiment))
 
-plotdata.hourly <- rates.aug1_15 %>% gather("type","n", 2:3 )
-plot.hourly.pos.neg <- rates.aug1_15 %>% gather("type", "n", 4:5)
+
+
+
+# Join them
+rates.cville <- rates.cville %>% left_join(avg.cville.data)
+
+plot.hourly.pos.neg <- rates.cville %>% gather("type", "n", 4:5)
 
 # Plot number of tweets per hour and sentiment #
  # count and sentiment
-ggplot(plotdata.hourly, aes(x=hour, y = n, color= type)) + geom_point(size = .001)
+ggplot(rates.cville, aes(x=hour, y = avgsent)) + geom_point(size = .001)
+ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
   
   # Negative/Positive by time
 ggplot(plotdata, aes(x = anytime(created_utc), y = n, color = sent )) + 
   geom_point(size = .001) 
 
   # Sentiment by time
-ggplot(aug1_15, aes(x= anytime(created_utc), y = sentiment)) + geom_point(size = .001) 
-  
-  # Neg/Pos grouped hourly
-ggplot(plotdata, aes(x = floor_date(anytime(created_utc)), y = n, color = sent )) + 
-  geom_point(size = .001) 
+ggplot(plotdata, aes(x= anytime(created_utc), y = sentiment)) + geom_point(size = .001) 
 
   # Avg pos/negative by hour
 ggplot(plot.hourly.pos.neg, aes(x=hour, y = n, color= type)) + geom_point(size = .001)
 
-# Checking GitHub # 
+###
+ggplot(avg.day  %>%
+         gather("type", "n", 3:4), aes(x=hour, y = n, color = type)) + geom_point(size = .001)
+
+ggplot(avg.day, aes(x=hour, y = varsent)) + geom_point(size = .001)
+
 
 
 
