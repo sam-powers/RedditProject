@@ -67,7 +67,6 @@ avg.day <- cville.data %>%
 
 
 
-
 # Join them
 rates.cville <- rates.cville %>% left_join(avg.cville.data)
 
@@ -89,6 +88,7 @@ ggplot(plotdata, aes(x= anytime(created_utc), y = sentiment)) + geom_point(size 
 ggplot(plot.hourly.pos.neg, aes(x=hour, y = n, color= type)) + geom_point(size = .001)
 
 ###
+# by half day #
 ggplot(avg.day  %>%
          gather("type", "n", 3:4), aes(x=hour, y = n, color = type)) + geom_point(size = .001)
 
