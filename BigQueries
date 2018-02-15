@@ -49,6 +49,14 @@ WHERE
 ORDER BY
   created_utc;
   
+
+Orlando, June
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2016_06]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'orlando')
   
   
   

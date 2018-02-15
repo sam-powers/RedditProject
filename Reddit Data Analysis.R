@@ -55,17 +55,15 @@ rates.cville <- cville.data %>%
   rename(count = n)
 
 # Average Sentiment per hour #
-avg.cville.data <- cville.data %>%
+avg.cville.data <- cville.data %>%   
   mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
   group_by(hour) %>% 
-  summarise(avgsent = mean(sentiment), avgpos = mean(positive), avgneg = mean(negative))
+  summarise(avgsent = mean(abs(sentiment)), avgpos = mean(positive), avgneg = mean(negative))
 
 avg.day <- cville.data %>%
   mutate(hour = floor_date(anytime(created_utc), unit = "12 hour")) %>%
   group_by(hour) %>% 
-  summarise(avgsent = mean(sentiment), avgpos = mean(positive), avgneg = mean(negative), varsent = var(sentiment))
-
-
+  summarise(avgsent = mean(abs(sentiment)), avgpos = mean(positive), avgneg = mean(negative), varsent = var(sentiment))
 
 # Join them
 rates.cville <- rates.cville %>% left_join(avg.cville.data)
@@ -74,7 +72,7 @@ plot.hourly.pos.neg <- rates.cville %>% gather("type", "n", 4:5)
 
 # Plot number of tweets per hour and sentiment #
  # count and sentiment
-ggplot(rates.cville, aes(x=hour, y = avgsent)) + geom_point(size = .001)
+ggplot(avg.cville.data, aes(x=hour, y = avgsent)) + geom_point(size = .001)
 ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
   
   # Negative/Positive by time
@@ -95,13 +93,13 @@ ggplot(avg.day  %>%
 ggplot(avg.day, aes(x=hour, y = varsent)) + geom_point(size = .001)
 
 
+######### Exponential Modeling #######
+ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
 
+modified.rates.cville <- (rates.cville[rates.cville$hour >= "2017-08-12 09:00:00",])
 
-
-
-
-
-
+exponential.cville <- lm(log(count) ~ hour, data = modified.rates.cville)
+summary(exponential.cville)
 
 
 
