@@ -13,7 +13,6 @@ cville.aug  <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=downloa
 cville.sept <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.sept))
 cville.oct <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
 
-
 cville <- rbind(cville.aug, cville.sept, cville.oct)
 
 ########
@@ -101,6 +100,28 @@ modified.rates.cville <- (rates.cville[rates.cville$hour >= "2017-08-12 09:00:00
 exponential.cville <- lm(log(count) ~ hour, data = modified.rates.cville)
 summary(exponential.cville)
 
+cville.mod <- lm(count ~ hour, data = modified.rates.cville)
+summary(cville.mod)
+
+## Residuals vs. predicted plot
+ggplot(exponential.cville, aes(x=.fitted, y=.resid)) + geom_point() + 
+  geom_hline(yintercept=0, linetype="dashed")
+
+## Residuals vs. explanatory variables plot
+ggplot(exponential.cville, aes(x= hour, y=.resid)) + geom_point() +
+  geom_hline(yintercept=0, linetype="dashed")
+
+
+## Q-Q plot
+X <- data.frame(resid = residuals(exponential.cville))
+
+y <- quantile(X$resid, c(0.25, 0.75)) 
+x <- qnorm( c(0.25, 0.75))  
+slope <- diff(y)/diff(x) 
+int <- y[1] - slope*x[1]   
+
+ggplot(X, aes(sample = resid)) + stat_qq() + 
+  geom_abline(intercept=int, slope=slope) 
 
 
 
