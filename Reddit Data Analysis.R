@@ -72,8 +72,10 @@ plot.hourly.pos.neg <- rates.cville %>% gather("type", "n", 4:5)
 # Plot number of tweets per hour and sentiment #
  # count and sentiment
 ggplot(avg.cville.data, aes(x=hour, y = avgsent)) + geom_point(size = .001)
-ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
-  
+ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001) 
+ggplot(rates.cville, aes(x = hour, y = log(log(count)))) + geom_point(size = .001) 
+
+
   # Negative/Positive by time
 ggplot(plotdata, aes(x = anytime(created_utc), y = n, color = sent )) + 
   geom_point(size = .001) 
@@ -122,6 +124,21 @@ int <- y[1] - slope*x[1]
 
 ggplot(X, aes(sample = resid)) + stat_qq() + 
   geom_abline(intercept=int, slope=slope) 
+
+ts.cville <- ts(rates.cville[,2], start = as.numeric(rates.cville[,1][1]), end = as.numeric(tail(rates.cville$hour, n=1)), frequency =1)
+
+tail(rates.cville$hour, n=1)
+
+fit <- ets(ts.cville)
+
+library(forecast)
+summary(fit)
+fit$alpha
+plot(forecast(fit, 3))
+
+accuracy(fit)
+
+
 
 
 

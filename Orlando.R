@@ -74,6 +74,8 @@ hourly.pos.neg.orlando <- rates.orlando %>% gather("type", "n", 4:5)
 # count and sentiment
 ggplot(avg.orlando.data, aes(x=hour, y = avgsent)) + geom_point(size = .001)
 ggplot(rates.orlando, aes(x = hour, y = count)) + geom_point(size = .001)
+ggplot(rates.orlando, aes(x = hour, y = log(count))) + geom_point(size = .001)
+
 
 # Negative/Positive by time
 ggplot(plotdata.orlando, aes(x = anytime(created_utc), y = n, color = sent )) + 
