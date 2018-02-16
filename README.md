@@ -7,14 +7,13 @@ How do local crises resonate on a national stage? Why do some tragedies linger w
 
 What is in this Github right now.
 
-     What have I done right now:
 - BigQueries contains a list of the SQL code run to retrieve the Reddit data from Google BigQuery Public Data sources  
 - RPackages.txt file contains a list of R packages to be imported before running the R codes
 - RedditDataAnalysis.R contains the model code for extracting data, cleaning it, running sentiment analysis and beginning basic graphs. It also contains the start of the modelling process.
 - Orlando.R contains a duplicate of the RedditDataAnalysis.R script but run with the data from the Orlando Shooting.
 - All data is stored in Google Drive and is retrieveable through publicly readable share links encoded within the R script. 
 
-     Where are we going with this?
+Where are we going with this? 
 
 - draft statistically defendable cut points for when sentiment and rate of posting return to "normal" (Most likely variance of sentiment and t-stat of post/hour rate compared to two weeks before baseline, Or perhaps when concavity changes/levels out)
 
