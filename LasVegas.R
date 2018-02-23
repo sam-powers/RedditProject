@@ -1,19 +1,20 @@
-library(anytime)
+library(anytime) 
 library(tidyverse)
 library(tidytext)
 library(lubridate)
+library(ggplot2)
 
 
 
-id <- "1Ij59kWoNUNQdNj3q3qqvmf0K1tBjqrz7"
-id.july <- "1IlnG19Z5Kih8caXAAz0nfeHuib_YiLFl"
-# id.aug <- 
+id.sep <- "1LGsiVpQoUD87uEHJx_yy9OkZNA5kiRu3"
+id.oct <- "1LJuCObKEgnNrMmAzq37nadRtAXb-Idaz"
+id.nov <- "1LM5qng5pE8n8mHDV7GbBbL2Rd6JeQ_pn"
 
-orlando.june  <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id))
-orlando.july <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.july))
-# orlando.aug <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
+vegas.nov  <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.sep))
+vegas.dec <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
+vegas.jan <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.nov))
 
-orlando <- rbind(orlando.june, orlando.july)
+vegas <- rbind(vegas.nov, vegas.dec, vegas.jan)
 ########
 # Define the functions I want for quick analysis #
 
@@ -35,55 +36,57 @@ sentimental <- function(dataframe){
 
 
 # Select the portions I want #
-orlando.data <- orlando %>% 
+vegas.data <- vegas %>% 
   dplyr::select(body, created_utc, subreddit) %>%
-  mutate(ID = 1:length(orlando$created_utc))
+  mutate(ID = 1:length(vegas$created_utc))
 
 #######
 
 # Use formula to get the sentiments #
-orlando.data <- sentimental(orlando.data)
-plotdata.orlando <- orlando.data %>% gather("sent","n", 5:6 )
+vegas.data <- sentimental(vegas.data)
+plotdata.vegas <- vegas.data %>% gather("sent","n", 5:6 )
 
 
 # Calculate number of tweets per hour #
-rates.orlando <- orlando.data %>% 
+rates.vegas <- vegas.data %>% 
   mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
   count(hour) %>%
   rename(count = n)
 
+
 # Average Sentiment per hour #
-avg.orlando.data <- orlando.data %>%   
+avg.vegas.data <- vegas.data %>%   
   mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
   group_by(hour) %>% 
   summarise(avgsent = mean(abs(sentiment)), avgpos = mean(positive), avgneg = mean(negative))
 
-avg.day <- orlando.data %>%
+avg.day <- vegas.data %>%
   mutate(hour = floor_date(anytime(created_utc), unit = "12 hour")) %>%
   group_by(hour) %>% 
   summarise(avgsent = mean(abs(sentiment)), avgpos = mean(positive), avgneg = mean(negative), varsent = var(sentiment))
 
 # Join them
-rates.orlando <- rates.orlando %>% left_join(avg.orlando.data)
+rates.vegas <- rates.vegas %>% left_join(avg.vegas.data)
 
-hourly.pos.neg.orlando <- rates.orlando %>% gather("type", "n", 4:5)
+hourly.pos.neg.vegas <- rates.vegas %>% gather("type", "n", 4:5)
 
 # Plot number of tweets per hour and sentiment #
 # count and sentiment
-ggplot(avg.orlando.data, aes(x=hour, y = avgsent)) + geom_point(size = .001)
-ggplot(rates.orlando, aes(x = hour, y = count)) + geom_point(size = .001)
-ggplot(rates.orlando, aes(x = hour, y = log(count))) + geom_point(size = .001)
+ggplot(avg.vegas.data, aes(x=hour, y = avgsent)) + geom_point(size = .001)
+ggplot(rates.vegas, aes(x = hour, y = count)) + geom_point(size = .001)
+ggplot(rates.vegas, aes(x = hour, y = log(count))) + geom_point(size = .001)
 
 
 # Negative/Positive by time
-ggplot(plotdata.orlando, aes(x = anytime(created_utc), y = n, color = sent )) + 
+ggplot(plotdata.vegas, aes(x = anytime(created_utc), y = n, color = sent )) + 
   geom_point(size = .001) 
 
 # Sentiment by time
-ggplot(plotdata.orlando, aes(x= anytime(created_utc), y = sentiment)) + geom_point(size = .001) 
+ggplot(plotdata.vegas, aes(x= anytime(created_utc), y = sentiment)) + geom_point(size = .001) 
 
 # Avg pos/negative by hour
-ggplot(hourly.pos.neg.orlando, aes(x=hour, y = n, color= type)) + geom_point(size = .001)
+ggplot(hourly.pos.neg.vegas, aes(x=hour, y = n, color= type)) + geom_point(size = .001)
+
 
 
 ###
