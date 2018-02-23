@@ -13,9 +13,6 @@ orlando.june  <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=downl
 orlando.july <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.july))
 # orlando.aug <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
 
-
-orlando <- rbind(orlando.june, orlando.july) 
-
 ########
 # Define the functions I want for quick analysis #
 
