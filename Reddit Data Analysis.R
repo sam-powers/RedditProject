@@ -1,9 +1,11 @@
 install.packages("anytime")
+install.packages("tseries")
 library(anytime)
 library(tidyverse)
 library(tidytext)
 library(lubridate)
-
+library(forecast)
+library(tseries)
 
 
 id <- "1D6SW839rjN9Eq_W1cWBRFMjgcNiP9ocZ"
@@ -97,9 +99,9 @@ ggplot(avg.day, aes(x=hour, y = varsent)) + geom_point(size = .001)
 ######### Exponential Modeling #######
 ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
 
-modified.rates.cville <- (rates.cville[rates.cville$hour >= "2017-08-12 09:00:00",])
+rates <- (rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",])
 
-exponential.cville <- lm(log(count) ~ hour, data = modified.rates.cville)
+exponential.cville <- lm(log(count) ~ hour, data =modified.rates.cville)
 summary(exponential.cville)
 
 cville.mod <- lm(count ~ hour, data = modified.rates.cville)
@@ -125,6 +127,10 @@ int <- y[1] - slope*x[1]
 ggplot(X, aes(sample = resid)) + stat_qq() + 
   geom_abline(intercept=int, slope=slope) 
 
+########## Lets try another approach bc that clearly doesnt work.
+
+
+
 ts.cville <- ts(rates.cville[,2], start = as.numeric(rates.cville[,1][1]), end = as.numeric(tail(rates.cville$hour, n=1)), frequency =1)
 
 tail(rates.cville$hour, n=1)
@@ -139,13 +145,58 @@ plot(forecast(fit, 3))
 accuracy(fit)
 
 
+##### Again #####
+
+View(rates)
+rates$hour <- as_datetime(rates$hour)
+count_ts = ts(rates[, c('count')])
 
 
+
+
+
+###### More Trash #####
+
+'
+ggplot() +
+  geom_line(data = rates, aes(x = hour, y = count)) + ylab("Count")
+
+rates$cnt_ma = ma(rates$count, order=12) # using the clean count with no outliers
+rates$cnt_ma24 = ma(rates$count, order=24)
+
+ggplot() +
+  geom_line(data = rates, aes(x = hour, y = count, colour = "Counts")) +
+  geom_line(data = rates, aes(x = hour, y = cnt_ma,   colour = "Half Day"))  +
+  geom_line(data = rates, aes(x = hour, y = cnt_ma24, colour = "Full Day"))  +
+  ylab("Comment Count")
+
+
+count_ma = ts(na.omit(rates$cnt_ma24), frequency=24)
+decomp = stl(count_ma, s.window="periodic")
+deseasonal_cnt <- seasadj(decomp)
+plot(decomp)
+
+adf.test(count_ma, alternative = "stationary")
+
+Acf(count_ma, main='')
+Pacf(count_ma, main='')
+
+count_d1 = diff(deseasonal_cnt, differences = 1)
+plot(count_d1)
+adf.test(count_d1, alternative = "stationary")
+
+Acf(count_d1, main="ACF for Differenced Series")
+Pacf(count_d1, main="PACF for Differenced Series")
+
+auto.arima(deseasonal_cnt, seasonal=FALSE)
+
+fit<-auto.arima(deseasonal_cnt, seasonal=FALSE)
+tsdisplay(residuals(fit), lag.max=45, main="(1,1,1) Model Residuals")
 
 
 
 ####### Trash ########
-'
+
 
 ##### getting sentiment into the data set
 d <- data.frame(aug1_15)
