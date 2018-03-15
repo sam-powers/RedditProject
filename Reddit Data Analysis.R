@@ -55,6 +55,11 @@ rates.cville <- cville.data %>%
   count(hour) %>%
   rename(count = n)
 
+rates.cville.2 <- cville.data %>% 
+  mutate(hour = floor_date(anytime(created_utc), unit = "2 hour")) %>%
+  count(hour) %>%
+  rename(count = n)
+
 # Average Sentiment per hour #
 avg.cville.data <- cville.data %>%   
   mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
@@ -97,15 +102,50 @@ ggplot(avg.day, aes(x=hour, y = varsent)) + geom_point(size = .001)
 
 
 ######### Exponential Modeling #######
+# Graph it all #
 ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
 
-rates <- (rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",])
+# Modify the rats for the cutoff #
+View(rates.cville.2)
+modified.rates.cville <- rates.cville.2[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
 
-exponential.cville <- lm(log(count) ~ hour, data =modified.rates.cville)
+# Make exponential model
+exponential.cville <- lm(log(count) ~ hour, data =modified.rates.cville) # Exponential Model
 summary(exponential.cville)
 
-cville.mod <- lm(count ~ hour, data = modified.rates.cville)
-summary(cville.mod)
+# Prepare Graph # 
+datelims <- range(modified.rates.cville$hour)
+date.grid=seq(from=datelims[1], to = datelims[2], by = "hour")
+plot(modified.rates.cville$hour, modified.rates.cville$count, xlim=datelims ,cex =.1, col =" darkgrey ")
+lines(date.grid, exp(predict(exponential.cville, newdata = list(hour = date.grid))), col ="red ",lwd =2)
+
+View(modified.rates.cville)
+# It may be hyperbolic
+plot(modified.rates.cville$hour, 1/(modified.rates.cville$count)**2, xlim=datelims ,cex =.1, col =" darkgrey ")
+
+# Prep Model
+inv <- lm((1/count) ~ hour, data = modified.rates.cville)
+inv.quad <- lm(1/(count**2) ~ hour, data = modified.rates.cville)
+inv.tri <- lm(1/(count**3) ~ hour, data = modified.rates.cville)
+summary(inv.quad)
+summary(inv.tri)
+
+Math.cbrt <- function(x) {
+  sign(x) * abs(x)^(1/3)
+}
+
+plot(modified.rates.cville$hour, modified.rates.cville$count, xlim=datelims ,cex =.1, col =" darkgrey ")
+lines(date.grid, exp(predict(exponential.cville, newdata = list(hour = date.grid))), col ="red ",lwd =2)
+lines(date.grid, exp(predict(exponential.cville, newdata = list(hour = date.grid))), col ="red ",lwd =2)
+lines(date.grid, 1/sqrt(predict(inv.quad, newdata = list(hour = date.grid))), col ="blue ",lwd =2)
+lines(date.grid, 1/Math.cbrt(predict(inv.tri, newdata = list(hour = date.grid))), col ="green ",lwd =2)
+lines(date.grid, 1/predict(inv, newdata = list(hour = date.grid)), col ="yellow ",lwd =2)
+
+
+predict(inv.quad, newdata = list(hour = date.grid))
+
+
+
 
 ## Residuals vs. predicted plot
 ggplot(exponential.cville, aes(x=.fitted, y=.resid)) + geom_point() + 
@@ -127,6 +167,22 @@ int <- y[1] - slope*x[1]
 ggplot(X, aes(sample = resid)) + stat_qq() + 
   geom_abline(intercept=int, slope=slope) 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'
 ########## Lets try another approach bc that clearly doesnt work.
 
 
@@ -149,15 +205,12 @@ accuracy(fit)
 
 View(rates)
 rates$hour <- as_datetime(rates$hour)
-count_ts = ts(rates[, c('count')])
-
-
-
+count_ts = ts(rates[, c(count)])
 
 
 ###### More Trash #####
 
-'
+
 ggplot() +
   geom_line(data = rates, aes(x = hour, y = count)) + ylab("Count")
 
