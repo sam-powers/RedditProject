@@ -107,11 +107,13 @@ ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
 
 # Modify the rats for the cutoff #
 View(rates.cville.2)
-modified.rates.cville <- rates.cville.2[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
+modified.rates.cville <- rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
+modified.rates.cville <- modified.rates.cville %>% mutate(num.time = as.numeric(hour) - as.numeric(hour[1]) + 1)
 
 # Make exponential model
 exponential.cville <- lm(log(count) ~ hour, data =modified.rates.cville) # Exponential Model
 summary(exponential.cville)
+
 
 # Prepare Graph # 
 datelims <- range(modified.rates.cville$hour)
@@ -119,7 +121,6 @@ date.grid=seq(from=datelims[1], to = datelims[2], by = "hour")
 plot(modified.rates.cville$hour, modified.rates.cville$count, xlim=datelims ,cex =.1, col =" darkgrey ")
 lines(date.grid, exp(predict(exponential.cville, newdata = list(hour = date.grid))), col ="red ",lwd =2)
 
-View(modified.rates.cville)
 # It may be hyperbolic
 plot(modified.rates.cville$hour, 1/(modified.rates.cville$count)**2, xlim=datelims ,cex =.1, col =" darkgrey ")
 
@@ -145,6 +146,8 @@ lines(date.grid, 1/predict(inv, newdata = list(hour = date.grid)), col ="yellow 
 predict(inv.quad, newdata = list(hour = date.grid))
 
 
+# Power Model #
+nls(count ~ b*(num.time^z), start = list(b = 1, z = -4), data = modified.rates.cville)
 
 
 ## Residuals vs. predicted plot
