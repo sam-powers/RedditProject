@@ -191,18 +191,24 @@ ggplot(X, aes(sample = resid)) + stat_qq() +
 install.packages("fitdistrplus")
 library("fitdistrplus")
 modified.rates.cville <- rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
-as.numeric(as.POSIXct("2017-08-12 12:00:00"))
 time.data <- cville$created_utc[cville$created_utc >= as.numeric(as.POSIXct("2017-08-12 12:00:00"))]
+time.data <- time.data - min(time.data)+ 1
+
+min(time.data)
+hist(time.data)
 fit.weibull <- fitdist(time.data, "weibull")
+summary(fit.weibull)
 plot(fit.weibull)
 
-fit.gamma <- fitdist(time.data, "exp")
+fit.gamma <- fitdist(time.data, "gamma")
 plot(fit.gamma)
 
+fit.exp <- fitdist(time.data, "exp")
+plot(fit.exp)
 
-
-
-
+fit.lnorm <- fitdist(time.data, "lnorm")
+summary(fit.lnorm)
+plot(fit.lnorm)
 
 
 
