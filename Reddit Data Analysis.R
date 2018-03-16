@@ -16,7 +16,7 @@ cville.sept <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=downloa
 cville.oct <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
 
 cville <- rbind(cville.aug, cville.sept, cville.oct)
-
+View(cville)
 ########
 # Define the functions I want for quick analysis #
 
@@ -108,6 +108,7 @@ ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001)
 # Modify the rats for the cutoff #
 View(rates.cville.2)
 modified.rates.cville <- rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
+# modified.rates.cville <- modified.rates.cville[-which(rates.cville$count <=750 & rates.cville$hour <= "2017-08-13 12:00:00" ),]
 modified.rates.cville <- modified.rates.cville %>% mutate(num.time = as.numeric(hour) - as.numeric(hour[1]) + 1)
 
 # Make exponential model
@@ -137,7 +138,6 @@ Math.cbrt <- function(x) {
 
 plot(modified.rates.cville$hour, modified.rates.cville$count, xlim=datelims ,cex =.1, col =" darkgrey ")
 lines(date.grid, exp(predict(exponential.cville, newdata = list(hour = date.grid))), col ="red ",lwd =2)
-lines(date.grid, exp(predict(exponential.cville, newdata = list(hour = date.grid))), col ="red ",lwd =2)
 lines(date.grid, 1/sqrt(predict(inv.quad, newdata = list(hour = date.grid))), col ="blue ",lwd =2)
 lines(date.grid, 1/Math.cbrt(predict(inv.tri, newdata = list(hour = date.grid))), col ="green ",lwd =2)
 lines(date.grid, 1/predict(inv, newdata = list(hour = date.grid)), col ="yellow ",lwd =2)
@@ -147,7 +147,25 @@ predict(inv.quad, newdata = list(hour = date.grid))
 
 
 # Power Model #
-nls(count ~ b*(num.time^z), start = list(b = 1, z = -4), data = modified.rates.cville)
+power.model <- nls(count ~(num.time**-z), start = list(z = 1), data = modified.rates.cville)
+
+num.lims <- range(modified.rates.cville$num.time)
+num.grid=seq(from=num.lims[1], to = num.lims[2], by = 3600)
+plot(modified.rates.cville$num.time, modified.rates.cville$count, xlim=num.lims ,cex =.1, col =" darkgrey ")
+lines(num.grid, predict(power.model, newdata = list(num.time = num.grid)), col ="red ",lwd =2)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ## Residuals vs. predicted plot
@@ -170,11 +188,16 @@ int <- y[1] - slope*x[1]
 ggplot(X, aes(sample = resid)) + stat_qq() + 
   geom_abline(intercept=int, slope=slope) 
 
+install.packages("fitdistrplus")
+library("fitdistrplus")
+modified.rates.cville <- rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
+as.numeric(as.POSIXct("2017-08-12 12:00:00"))
+time.data <- cville$created_utc[cville$created_utc >= as.numeric(as.POSIXct("2017-08-12 12:00:00"))]
+fit.weibull <- fitdist(time.data, "weibull")
+plot(fit.weibull)
 
-
-
-
-
+fit.gamma <- fitdist(time.data, "exp")
+plot(fit.gamma)
 
 
 
