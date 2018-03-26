@@ -15,6 +15,46 @@ vegas.dec <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download"
 vegas.jan <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.nov))
 
 vegas <- rbind(vegas.nov, vegas.dec, vegas.jan)
+
+######
+vegas.data <- vegas %>% 
+  dplyr::select(body, created_utc, subreddit) %>%
+  mutate(ID = 1:length(vegas$created_utc))
+
+rates.vegas <- vegas.data %>% 
+  mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
+  count(hour) %>%
+  rename(count = n)
+View(rates.vegas)
+
+ggplot(rates.vegas, aes(x = hour, y = count)) + geom_point(size = .001)
+
+
+time.data.v <- vegas$created_utc[vegas$created_utc >= as.numeric(as.POSIXct("2017-10-02 06:00:00"))]
+time.data.v <- time.data.v - min(time.data.v)+ 1
+time.data.v <- time.data.v[time.data.v <= 4838400]
+
+range(time.data.v)
+hist(time.data.v)
+fit.lnorm.v <- fitdist(time.data.v, "lnorm")
+summary(fit.lnorm.v)
+plot(fit.lnorm.v)
+
+max(rates.vegas$count)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ########
 # Define the functions I want for quick analysis #
 

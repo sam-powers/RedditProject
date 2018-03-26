@@ -14,6 +14,50 @@ orlando.july <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=downlo
 # orlando.aug <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.oct))
 
 orlando <- rbind(orlando.june, orlando.july)
+
+########
+orlando.data <- orlando %>% 
+  dplyr::select(body, created_utc, subreddit) %>%
+  mutate(ID = 1:length(orlando$created_utc))
+
+rates.orlando <- orlando.data %>% 
+  mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
+  count(hour) %>%
+  rename(count = n)
+View(rates.orlando)
+
+ggplot(rates.orlando, aes(x = hour, y = count)) + geom_point(size = .001)
+
+
+time.data.o <- orlando$created_utc[orlando$created_utc >= as.numeric(as.POSIXct("2016-06-12 07:00:00"))]
+time.data.o <- time.data.o - min(time.data.o)+ 1
+time.data.o <- time.data.o[time.data.o <= 4838400]
+
+range(time.data.o)
+hist(time.data.o)
+fit.lnorm.o <- fitdist(time.data.o, "lnorm")
+summary(fit.lnorm.o)
+plot(fit.lnorm.o)
+
+max(rates.orlando$count)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ########
 # Define the functions I want for quick analysis #
 

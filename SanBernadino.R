@@ -15,6 +15,37 @@ sbern.dec <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download"
 sbern.jan <- read_csv(sprintf("https://docs.google.com/uc?id=%s&export=download", id.jan))
 
 sbern <- rbind(sbern.nov, sbern.dec, sbern.jan)
+
+########
+sbern.data <- sbern %>% 
+  dplyr::select(body, created_utc, subreddit) %>%
+  mutate(ID = 1:length(sbern$created_utc))
+
+rates.sbern <- sbern.data %>% 
+  mutate(hour = floor_date(anytime(created_utc), unit = "1 hour")) %>%
+  count(hour) %>%
+  rename(count = n)
+View(rates.sbern)
+
+ggplot(rates.sbern, aes(x = hour, y = count)) + geom_point(size = .001)
+
+
+
+time.data.s <- sbern$created_utc[sbern$created_utc >= as.numeric(as.POSIXct("2015-12-02 19:00:00"))]
+time.data.s <- time.data.s - min(time.data.s)+ 1
+time.data.s <- time.data.s[time.data.s <= 4838400]
+
+range(time.data.s)
+hist(time.data.s)
+fit.lnorm.s <- fitdist(time.data.s, "lnorm")
+summary(fit.lnorm.s)
+plot(fit.lnorm.s)
+
+max(rates.sbern$count)
+
+############
+
+
 ########
 # Define the functions I want for quick analysis #
 
@@ -95,3 +126,17 @@ ggplot(avg.day  %>%
          gather("type", "n", 3:4), aes(x=hour, y = n, color = type)) + geom_point(size = .001)
 
 ggplot(avg.day, aes(x=hour, y = varsent)) + geom_point(size = .001)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

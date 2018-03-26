@@ -147,22 +147,12 @@ predict(inv.quad, newdata = list(hour = date.grid))
 
 
 # Power Model #
-power.model <- nls(count ~(num.time**-z), start = list(z = 1), data = modified.rates.cville)
+power.model <- nls(count ~(num.time**z), start = list(z = -2), data = modified.rates.cville)
 
 num.lims <- range(modified.rates.cville$num.time)
 num.grid=seq(from=num.lims[1], to = num.lims[2], by = 3600)
 plot(modified.rates.cville$num.time, modified.rates.cville$count, xlim=num.lims ,cex =.1, col =" darkgrey ")
 lines(num.grid, predict(power.model, newdata = list(num.time = num.grid)), col ="red ",lwd =2)
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -188,32 +178,27 @@ int <- y[1] - slope*x[1]
 ggplot(X, aes(sample = resid)) + stat_qq() + 
   geom_abline(intercept=int, slope=slope) 
 
-install.packages("fitdistrplus")
+
+################
+# install.packages("fitdistrplus")
 library("fitdistrplus")
+
+ggplot(rates.cville, aes(x = hour, y = count)) + geom_point(size = .001) 
+max(rates.cville$count)
+
+
 modified.rates.cville <- rates.cville[rates.cville$hour >= "2017-08-12 12:00:00",] #& rates.cville$hour <= "2017-09-01 12:00:00",]
-time.data <- cville$created_utc[cville$created_utc >= as.numeric(as.POSIXct("2017-08-12 12:00:00"))]
-time.data <- time.data - min(time.data)+ 1
+time.data.c <- cville$created_utc[cville$created_utc >= as.numeric(as.POSIXct("2017-08-12 12:00:00"))]
+time.data.c <- time.data.c - min(time.data.c)+ 1
+time.data.c <- time.data.c[time.data.c <= 4838400]
+range(time.data.c)
 
-min(time.data)
-hist(time.data)
-fit.weibull <- fitdist(time.data, "weibull")
-summary(fit.weibull)
-plot(fit.weibull)
+fit.lnorm.c <- fitdist(time.data.c, "lnorm")
+summary(fit.lnorm.c)
+plot(fit.lnorm.c)
 
-fit.gamma <- fitdist(time.data, "gamma")
-plot(fit.gamma)
-
-fit.exp <- fitdist(time.data, "exp")
-plot(fit.exp)
-
-fit.lnorm <- fitdist(time.data, "lnorm")
-summary(fit.lnorm)
-plot(fit.lnorm)
-
-
-
-
-
+# John Dorning #
+# Discrete Time Dynamical System #
 '
 ########## Lets try another approach bc that clearly doesnt work.
 
