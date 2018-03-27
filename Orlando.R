@@ -45,19 +45,6 @@ max(rates.orlando$count)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 ########
 # Define the functions I want for quick analysis #
 
