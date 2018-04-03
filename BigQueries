@@ -57,6 +57,148 @@ FROM
   [fh-bigquery:reddit_comments.2016_06]
 WHERE
   REGEXP_MATCH(LOWER(body),r'orlando')
+
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2017_09]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'las vegas')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2017_10]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'las vegas')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2017_11]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'las vegas')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2015_11]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'san bernadino')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2015_12]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'san bernadino')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2016_01]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'san bernadino')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2016_01]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'san bernadino') OR REGEXP_MATCH(LOWER(body),r'sanbernadino')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2016_06]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'orlando') OR REGEXP_MATCH(LOWER(body),r'pulse night club')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2017_05]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'lincoln county')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2017_06]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'lincoln county')
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2012]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'sandy')
+  OR REGEXP_MATCH(LOWER(body),r'newtown')
+  OR REGEXP_MATCH(LOWER(body),r'oak creek')
+
+SELECT
+  *
+FROM
+  [arched-cabinet-193904:2012_query.2012_Query_results]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'oak creek')
+  AND created_utc BETWEEN 1343779200
+  AND 1350691200
+
+SELECT
+  *
+FROM
+  [arched-cabinet-193904:2012_query.2012_Query_results]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'oak creek')
+  AND created_utc BETWEEN 1350691200
+  AND 1355356800
+
+SELECT
+  *
+FROM
+  [arched-cabinet-193904:2012_query.2012_Query_results]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'sandy')
+  AND created_utc BETWEEN 1350691200
+  AND 1355356800
+
+SELECT
+  *
+FROM
+  [arched-cabinet-193904:2012_query.2012_Query_results]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'newtown')
+  AND created_utc BETWEEN 1355356800
+  AND 1356998399
+
+SELECT
+  *
+FROM
+  [fh-bigquery:reddit_comments.2013]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'newtown')
+  OR REGEXP_MATCH(LOWER(body),r'navy yard')
+
+SELECT
+  *
+FROM
+  [arched-cabinet-193904:2012_query.2013_query_data]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'newtown')
+  AND created_utc BETWEEN 1356998400
+  AND 1362009600
+
+SELECT
+  *
+FROM
+  [arched-cabinet-193904:2012_query.2013_query_data]
+WHERE
+  REGEXP_MATCH(LOWER(body),r'navy yard')
+  AND created_utc BETWEEN 1379116800
+  AND 1384819200
   
   
   
